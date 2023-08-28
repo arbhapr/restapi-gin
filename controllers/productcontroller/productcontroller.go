@@ -1,8 +1,8 @@
 package productcontroller
 
 import (
+	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/arbhapr/restapi-gin/models"
 	"github.com/gin-gonic/gin"
@@ -60,14 +60,16 @@ func Update(c *gin.Context) {
 }
 func Delete(c *gin.Context) {
 	var product models.Product
-	input := map[string]string{"id": "0"}
+	var input struct {
+		Id json.Number
+	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	id, _ := strconv.ParseInt(input["id"], 10, 64)
+	id, _ := input.Id.Int64()
 	if models.DB.Delete(&product, "id = ?", id).RowsAffected == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "can not delete data"})
 		return
